@@ -10,7 +10,7 @@ from sklearn.metrics import r2_score, mean_squared_error
 st.set_page_config(page_title="Práctica 4.2 - Regresión Lineal", layout="wide")
 st.title("Predicción del Consumo Per Cápita de Agua Potable (CPC)")
 
-# Generación de datos determinista en DuckDB
+# Configuración de base de datos y simulación
 duckdb.sql("SELECT setseed(0.42);")
 duckdb.sql("""
 CREATE TABLE IF NOT EXISTS agua AS
@@ -30,7 +30,13 @@ FROM range(150);
 
 df_agua = duckdb.sql("SELECT * FROM agua").df()
 
-# Ajuste del modelo
+# Código 1: Ajuste del modelo MCO (OLS)
+st.header("Código 1: Regresión Lineal Múltiple OLS")
+st.markdown("""
+En esta sección se ajusta el modelo de **Mínimos Cuadrados Ordinarios (OLS)** utilizando `statsmodels` 
+para predecir la variable dependiente $Y$ (**cpc_consumo**) a partir de los predictores meteorológicos y demográficos.
+""")
+
 X = df_agua[['temperatura_max', 'humedad_max', 'personas_familia', 'consumo_bidon_pc']]
 Y = df_agua['cpc_consumo']
 X_const = sm.add_constant(X)
@@ -41,13 +47,17 @@ residuos = modelo_ols.resid
 r2 = r2_score(Y, y_pred)
 rmse = np.sqrt(mean_squared_error(Y, y_pred))
 
-# Visualizaciones
-st.subheader("Métricas del Modelo")
+# Sección de Resultados
+st.header("Resultados del Modelo")
 col1, col2 = st.columns(2)
 col1.metric("Coeficiente R²", f"{r2*100:.2f}%")
 col2.metric("RMSE", f"{rmse:.4f} lt/hab-día")
 
-st.subheader("Panel Visual de Diagnóstico")
+with st.expander("Ver Resumen Detallado del Modelo (Summary OLS)"):
+    st.text(modelo_ols.summary())
+
+# Diagnostic Visual Panel
+st.header("Panel Visual de Diagnóstico")
 sns.set_theme(style="whitegrid")
 fig, axes = plt.subplots(2, 3, figsize=(18, 10))
 
