@@ -5,10 +5,3 @@ statsmodels
 scikit-learn
 matplotlib
 seaborn
-scipy
-numpy
-
-from google.colab import files
-
-files.download('app.py')
-files.download('requirements.txt')
